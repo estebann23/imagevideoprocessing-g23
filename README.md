@@ -4,3 +4,7 @@ _Group #23 - Team members:_
 - Denisa Nastasă
 - Esteban Naranjo
 - Fernando Cabria
+
+## Instructions (Quick start)
+- pip install kagglehub
+- Run import.py to load kaggle folder
