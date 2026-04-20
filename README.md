@@ -6,5 +6,6 @@ _Group #23 - Team members:_
 - Fernando Cabria
 
 ## Instructions (Quick start)
-- pip install kagglehub
-- Run import.py to load kaggle folder
+- `pip install kagglehub`
+- Run `python load_kaggle.py`
+- Run `python predict.py`
