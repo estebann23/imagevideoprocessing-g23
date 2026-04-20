@@ -1,4 +1,4 @@
-# Introduction to Image and Video Processing (KEN2328)  
+# Handwritten Digits Recognition - Introduction to Image and Video Processing (KEN2328)
 
 _Group #23 - Team members:_
 - Denisa Nastasă
