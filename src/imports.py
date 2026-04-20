@@ -1,45 +1,64 @@
-import kagglehub
-import os
 import numpy as np
 import pandas as pd
+from load_kaggle import path
 
-KAGGLE_API_TOKEN="KGAT_6716038ad78e3e6d9f96899d00f51e87"
-
-username="estebanna"
-key="156af646e15dabadbf85a3eb37f35c36"
-
-os.environ["KAGGLE_USERNAME"] = username
-os.environ["KAGGLE_KEY"] = key
+from PIL import Image
+def load_image(path) -> np.ndarray:
+    img = Image.open(path).convert("L").resize((28, 28))
+    return np.array(img, dtype=np.float32).flatten() / 255.0
 
 
-path = kagglehub.competition_download('iivp-2026-challenge')
+# ---------
+# train data
 
-print("Path to competition files:", path)
+train_df = pd.read_csv(path / "train.csv")
+X_train_list, y_train_list = [], []
 
-def load_from_image_folder(path):
-    from PIL import Image
- 
-    training_data = pd.read_csv(path / "train.csv")
-    id_col, label_col = "Id", "Category"
- 
-    def read_images(df, folder, has_label=True):
-        imgs, ids, labels = [], [], []
-        for _, row in df.iterrows():
-            img_path = path / folder / f"{row[id_col]}.png"
-            img = Image.open(img_path).convert("L").resize((28, 28))
-            imgs.append(np.array(img).flatten())
-            ids.append(row[id_col])
-            if has_label:
-                labels.append(row[label_col])
-        return np.array(imgs), ids, np.array(labels) if has_label else None
-    test_df = pd.read_csv(path / "test.csv")
-    X_train, train_ids, y_train = read_images(training_data, "train")
-    X_test,  test_ids,  _       = read_images(test_df,      "test", has_label=False)
- 
-    return X_train, y_train, X_test, np.array(test_ids)
+train_image_dir = path / "train"
+stem_to_path = {
+    p.stem: p
+    for p in train_image_dir.rglob("*.png")
+}
+print(f"Train images found: {len(stem_to_path)}")
 
-X_train, y_train, X_test, test_ids = load_from_image_folder(path)
-print("Test data shape:", X_test.shape)
+for _, row in train_df.iterrows():
+    img_id  = str(row["Id"])
+    label   = int(row["Category"])
+    img_path = stem_to_path.get(img_id)
 
-X_train = X_train.astype(np.float32) / 255.0
-X_test  = X_test.astype(np.float32)  / 255.0
+    if img_path is None:
+        missing_train += 1
+        continue
+
+    X_train_list.append(load_image(img_path))
+    y_train_list.append(label)
+
+X_train = np.array(X_train_list, dtype=np.float32)
+y_train = np.array(y_train_list, dtype=np.int32)
+print(f"X_train: {X_train.shape}, y_train: {y_train.shape}")
+
+
+# -----------
+# test data
+
+test_df = pd.read_csv(path / "test.csv")
+
+test_image_dir = path / "test"
+test_stem_to_path = {
+    p.stem: p
+    for p in test_image_dir.iterdir()
+}
+print(f"Test images found: {len(test_stem_to_path)}")
+
+X_test_list, test_ids = [], []
+
+for _, row in test_df.iterrows():
+    img_id   = str(row["Id"])
+    img_path = test_stem_to_path.get(img_id)
+
+    X_test_list.append(load_image(img_path))
+    test_ids.append(img_id)
+
+X_test   = np.array(X_test_list, dtype=np.float32)
+test_ids = np.array(test_ids)
+print(f"X_test: {X_test.shape}, test_ids: {len(test_ids)}")
