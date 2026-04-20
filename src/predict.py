@@ -5,7 +5,7 @@ from sklearn.model_selection import cross_val_score
 import pandas as pd
 
 print("training Random forest")
-model = RandomForestClassifier(estimators=200,jobs=-1, random_state=42)
+model = RandomForestClassifier(n_estimators=200, n_jobs=-1, random_state=42)
 model.fit(X_train, y_train)
 
 # crossvalidation accuracy estimation

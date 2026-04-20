@@ -1,20 +1,24 @@
+from concurrent.futures import ThreadPoolExecutor
+
 import numpy as np
 import pandas as pd
+from pathlib import Path
 from load_kaggle import path
 
-from PIL import Image
-def load_image(path) -> np.ndarray:
-    img = Image.open(path).convert("L").resize((28, 28))
-    return np.array(img, dtype=np.float32).flatten() / 255.0
+DATA_PATH = Path(path)
 
+from PIL import Image
+def load_image(img_path: Path) -> np.ndarray:
+    img = Image.open(img_path).convert("L").resize((28, 28))
+    return np.array(img, dtype=np.float32).flatten() / 255.0
 
 # ---------
 # train data
 
-train_df = pd.read_csv(path / "train.csv")
+train_df = pd.read_csv(DATA_PATH / "train.csv")
 X_train_list, y_train_list = [], []
 
-train_image_dir = path / "train"
+train_image_dir = DATA_PATH / "train"
 stem_to_path = {
     p.stem: p
     for p in train_image_dir.rglob("*.png")
@@ -41,24 +45,15 @@ print(f"X_train: {X_train.shape}, y_train: {y_train.shape}")
 # -----------
 # test data
 
-test_df = pd.read_csv(path / "test.csv")
+test_image_dir = DATA_PATH /"test"/"test"
 
-test_image_dir = path / "test"
-test_stem_to_path = {
-    p.stem: p
-    for p in test_image_dir.iterdir()
-}
-print(f"Test images found: {len(test_stem_to_path)}")
-
-X_test_list, test_ids = [], []
-
-for _, row in test_df.iterrows():
-    img_id   = str(row["Id"])
-    img_path = test_stem_to_path.get(img_id)
-
-    X_test_list.append(load_image(img_path))
-    test_ids.append(img_id)
-
-X_test   = np.array(X_test_list, dtype=np.float32)
-test_ids = np.array(test_ids)
+test_paths = [p for p in test_image_dir.iterdir() if p.is_file() and p.suffix == ".png"]
+print(f"Test images found: {len(test_paths)}")
+ 
+# Load in parallel — same approach as training
+with ThreadPoolExecutor() as executor:
+    test_images = list(executor.map(load_image, test_paths))
+ 
+X_test   = np.array(test_images, dtype=np.float32)
+test_ids = np.array([p.stem for p in test_paths])
 print(f"X_test: {X_test.shape}, test_ids: {len(test_ids)}")
