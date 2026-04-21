@@ -1,26 +1,39 @@
+import numpy as np
+import pandas as pd
+import tensorflow as tf
+from tensorflow.keras import layers, models
 from imports import X_train, y_train, X_test, test_ids
 
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score
-import pandas as pd
 
-print("training Random forest")
-model = RandomForestClassifier(n_estimators=200, n_jobs=-1, random_state=42)
-model.fit(X_train, y_train)
 
-# crossvalidation accuracy estimation
-cv_scores = cross_val_score(model, X_train, y_train, cv=3, scoring="accuracy")
-print(f"Cross-validation accuracy: {cv_scores.mean():.4f} ± {cv_scores.std():.4f}")
+print("Building Convolutional Neural Network")
+model = models.Sequential([
+    layers.Conv2D(filters=32, kernel_size=(3, 3), activation='relu', input_shape=(28, 28, 1)),
+    layers.MaxPooling2D((2, 2)),
+    
+    layers.Conv2D(filters=64, kernel_size=(3, 3), activation='relu'),
+    layers.MaxPooling2D((2, 2)), 
+    
+    layers.Flatten(),
+    layers.Dense(64, activation='relu'), 
+    layers.Dense(10, activation='softmax')
+])
 
-predictions = model.predict(X_test)
+model.compile(optimizer='adam',
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy']
+              )
 
-# Save submission
+print("Training model...")
+model.fit(X_train, y_train, epochs= 10, validation_split=0.2)
+
+print("Predicting test data...")
+predictions_prob = model.predict(X_test)
+predictions = np.argmax(predictions_prob, axis=-1)
+
 submission = pd.DataFrame({
     "Id": test_ids,
     "Category": predictions,
 })
-
-output_path = "submission.csv"
-submission.to_csv(output_path, index=False)
-print("submission.csv saved")
-print(submission.head(50))
+submission.to_csv("cnn_submission.csv", index=False)
+print("cnn_submission.csv saved successfully.")

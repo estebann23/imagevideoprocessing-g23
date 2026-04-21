@@ -10,7 +10,7 @@ DATA_PATH = Path(path)
 from PIL import Image
 def load_image(img_path: Path) -> np.ndarray:
     img = Image.open(img_path).convert("L").resize((28, 28))
-    return np.array(img, dtype=np.float32).flatten() / 255.0
+    return np.array(img, dtype=np.float32).reshape(28, 28, 1) / 255.0
 
 # ---------
 # train data
@@ -20,7 +20,7 @@ X_train_list, y_train_list = [], []
 
 train_image_dir = DATA_PATH / "train"
 stem_to_path = {
-    p.stem: p
+    p.stem: p   
     for p in train_image_dir.rglob("*.png")
 }
 print(f"Train images found: {len(stem_to_path)}")
