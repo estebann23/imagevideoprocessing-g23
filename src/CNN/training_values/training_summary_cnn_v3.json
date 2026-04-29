@@ -1,0 +1,8 @@
+{
+  "best_epoch": 27,
+  "best_val_accuracy": 0.9997059106826782,
+  "best_val_loss": 0.0018170715775340796,
+  "epochs_run": 42,
+  "history_csv": "training_history_cnn_v3.csv",
+  "best_model": "best_cnn_v3.h5"
+}
