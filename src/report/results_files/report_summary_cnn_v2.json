@@ -1,0 +1,7 @@
+{
+  "best_epoch": 27,
+  "best_val_accuracy": 0.9997059106826782,
+  "total_val_samples": 3400,
+  "misclassified": 1,
+  "correct": 3399
+}

@@ -10,9 +10,9 @@ from tensorflow.keras.models import load_model
 from sklearn.metrics import classification_report, confusion_matrix
 
 # Paths
-CNN_DIR = Path(__file__).resolve().parent.parent / "CNN"  # go up to src, then into CNN
-best_model_path = CNN_DIR / "best_cnn.h5"
-history_csv = CNN_DIR / "training_history.csv"
+CNN_DIR = Path(__file__).resolve().parent.parent / "CNN"
+best_model_path = CNN_DIR / "output_saved_models" / "best_cnn.h5"
+history_csv     = CNN_DIR / "training_values" / "training_history.csv"
 
 # Load data (imports.py)
 from imports import X_train, y_train
@@ -65,6 +65,7 @@ if history_csv.exists():
     plt.xlabel('epoch')
     plt.ylabel('accuracy')
     plt.legend()
+    plt.title('Original CNN — Accuracy')
     plt.grid(True)
     plt.tight_layout()
     plt.savefig(CNN_DIR / "accuracy_plot.png", dpi=150)
@@ -77,6 +78,7 @@ if history_csv.exists():
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
+    plt.title('Original CNN — Loss')
     plt.grid(True)
     plt.tight_layout()
     plt.savefig(CNN_DIR / "loss_plot.png", dpi=150)
